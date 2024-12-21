@@ -7,7 +7,7 @@ let handler = async (m, { conn: star, command, args, text, usedPrefix }) => {
     try {
     let res = await search(args.join(" "))
     let img = await (await fetch(`${res[0].image}`)).buffer()
-    let txt = '─ׄ─ׄ─⭒𝙔𝙤𝙪𝙏𝙪𝙗𝙚 𝙗𝙮 𝙎𝘼𝙉𝙏 𝘽𝙊𝙏⭒─ׄ─ׄ─\n\n'
+    let txt = '─ׄ─ׄ─⭒𝙔𝙤𝙪𝙏𝙪𝙗𝙚 𝙗𝙮 RAGE BOT⭒─ׄ─ׄ─\n\n'
        txt += `📄 *Titulo :* ${res[0].title}\n`
        txt += `🕐 *Duración :* ${secondString(res[0].duration.seconds)}\n`
        txt += `📆 *Publicado :* ${eYear(res[0].ago)}\n`

@@ -9,7 +9,7 @@ let img = catalogo
     forwardedNewsletterMessageInfo: {
       newsletterJid: "canalid",
       serverMessageId: 100,
-      newsletterName: '𝙎𝘼𝙉𝙏 𝘽𝙊𝙏',
+      newsletterName: 'RAGE BOT',
     },
 	    externalAdReply: {
 				    showAdAttribution: true,
@@ -18,7 +18,7 @@ let img = catalogo
 					mediaUrl: null,
 					description: null,
 					previewType: "PHOTO",
-					thumbnailUrl: 'https://i.ibb.co/27rdXbJ/bot.jpg',
+					thumbnailUrl: 'https://i.ibb.co/TLXSZDL/PERFIL-WHATS-RAGE.png',
 		           sourceUrl: canal,
 		           mediaType: 1,
                    renderLargerThumbnail: false
@@ -52,14 +52,14 @@ isForwarded: true,
 forwardedNewsletterMessageInfo: {
 newsletterJid: "canalid",
 serverMessageId: 100,
-newsletterName: '𝙎𝘼𝙉𝙏 𝘽𝙊𝙏',
+newsletterName: 'RAGE BOT',
 },
 externalAdReply: { 
 showAdAttribution: true,
-title: '⟢◦ 𝐍𝐅 𝐁𝐎𝐓',
+title: 'RAGE BOT',
 body: 'Powered By Nao',
 previewType: "PHOTO",
-thumbnailUrl: 'https://i.ibb.co/27rdXbJ/bot.jpg',
+thumbnailUrl: 'https://i.ibb.co/TLXSZDL/PERFIL-WHATS-RAGE.png',
 sourceUrl: 'https://www.instagram.com/08._santiago17',
 mediaType: 1,
 renderLargerThumbnail: false

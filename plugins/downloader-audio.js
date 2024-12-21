@@ -3,7 +3,7 @@ let limit = 200
 
 let handler = async (m, { conn, text, isPrems, isOwner, usedPrefix, command }) => {
 if (!m.quoted) return conn.reply(m.chat, `🚩 Etiqueta el mensaje que contenga el resultado de YouTube Play.`, m).then(_ => m.react('✖️'))
-if (!m.quoted.text.includes("─ׄ─ׄ─⭒𝙔𝙤𝙪𝙏𝙪𝙗𝙚 𝙗𝙮 𝙎𝘼𝙉𝙏 𝘽𝙊𝙏⭒─ׄ─ׄ─")) return conn.reply(m.chat, `[ 🚩 ] Etiqueta el mensaje que contenga el resultado de YouTube Play.`, m).then(_ => m.react('✖️'))
+if (!m.quoted.text.includes("─ׄ─ׄ─⭒𝙔𝙤𝙪𝙏𝙪𝙗𝙚 𝙗𝙮 RAGE BOT⭒─ׄ─ׄ─")) return conn.reply(m.chat, `[ 🚩 ] Etiqueta el mensaje que contenga el resultado de YouTube Play.`, m).then(_ => m.react('✖️'))
 let urls = m.quoted.text.match(new RegExp(/(?:https?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed|shorts)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\_-]+)/, 'gi'))
 if (!urls) return conn.reply(m.chat, `Resultado no Encontrado.`, m).then(_ => m.react('✖️'))
 if (urls.length < text) return conn.reply(m.chat, `Resultado no Encontrado.`, m).then(_ => m.react('✖️'))
