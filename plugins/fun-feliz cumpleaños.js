@@ -1,7 +1,7 @@
 /* By Sant */
 
 const handler = async (m, {conn, text}) => {
-  m.reply(`*> "${pickRandom(global.felizcumpleaños)}"*\n\n𝑨𝒎𝒆𝒓𝒊 𝑩𝒐𝒕`);
+  m.reply(`*> "${pickRandom(global.felizcumpleaños)}"*\n\n𝑩𝒐𝒕`);
 };
 handler.help = ['felizcumpleaños']
 handler.tags = ['fun'];
