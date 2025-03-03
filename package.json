@@ -18,20 +18,20 @@
     "eslint": "eslint .",
     "eslintfix": "eslint --fix ."
   },
-  "homepage": "https://github.com/yare1107/salvador",
+  "homepage": "https://github.com/yare1107/rage",
   "author": {
     "name": "Sant"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yare1107/salvador.git"
+    "url": "git+https://github.com/yare1107/rage.git"
   },
   "bugs": {
-    "url": "https://github.com/yare1107/salvador/issues"
+    "url": "https://github.com/yare1107/rage/issues"
   },
   "license": "GPL-3.0-or-later",
   "dependencies": {
-        "@whiskeysockets/baileys": "^6.7.0",
+         "@whiskeysockets/baileys": "github:ds6/bails",
         "@adiwajshing/keyed-db": "^0.2.4",
         "@bochilteam/scraper": "^4.2.4",
         "@bochilteam/scraper-sosmed": "^1.0.5",
