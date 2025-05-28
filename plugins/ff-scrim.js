@@ -2,8 +2,8 @@ let partidasScrim = {};
 
 const handler = async (m, { conn, args }) => {
     // Verificar si se proporcionaron los argumentos necesarios
-    if (args.length < 3) {
-        conn.reply(m.chat, '_Debes proporcionar la hora (HH:MM), el país (MX, CO, CL, AR) y la casilla (ej: C10)._', m);
+    if (args.length < 2) {
+        conn.reply(m.chat, '_Debes proporcionar la hora (HH:MM) y el país (MX, CO, CL, AR)._', m);
         return;
     }
 
@@ -16,7 +16,6 @@ const handler = async (m, { conn, args }) => {
 
     const horaUsuario = args[0]; // Hora proporcionada por el usuario
     const pais = args[1].toUpperCase(); // País proporcionado por el usuario
-    const casilla = args[2].toUpperCase(); // Casilla proporcionada por el usuario
 
     // Definir la diferencia horaria de cada país con respecto a México
     const diferenciasHorarias = {
@@ -65,7 +64,7 @@ const handler = async (m, { conn, args }) => {
 🇨🇱 𝐂𝐇𝐈𝐋𝐄 : ${formatTime(horasEnPais[2])}
 🇦🇷 𝐀𝐑𝐆𝐄𝐍𝐓𝐈𝐍𝐀 : ${formatTime(horasEnPais[3])}
 
-Casilla: ${casilla}
+Casilla:
 
 𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔
 
@@ -79,7 +78,8 @@ Casilla: ${casilla}
 🥷🏻 ┇ 
 🥷🏻 ┇
 
-(𝚁𝚎𝚊𝚌𝚌𝚒𝚘𝚗𝚊 𝚌𝚘𝚗 ❤️ 𝚙𝚊𝚛𝚊 𝚞𝚗𝚒𝚛𝚝𝚎)
+(𝚁𝚎𝚊𝚌𝚌𝚒𝚘𝚗𝚊 𝚌𝚘𝚗 ❤️ 𝚙𝚊𝚛𝚊 𝚞𝚗𝚒𝚛𝚝𝚎 𝚊 𝚕𝚊 𝚎𝚜𝚌𝚞𝚊𝚍𝚛𝚊)
+(𝚁𝚎𝚊𝚌𝚌𝚒𝚘𝚗𝚊 𝚌𝚘𝚗 😂 𝚙𝚊𝚛𝚊 𝚜𝚎𝚛 𝚜𝚞𝚙𝚕𝚎𝚗𝚝𝚎)
 `.trim();
     
     let msg = await conn.sendMessage(m.chat, { text: message }, { quoted: m });
@@ -89,7 +89,6 @@ Casilla: ${casilla}
         chat: m.chat,
         jugadores: [],
         suplentes: [],
-        casilla: casilla, // Guardar la casilla
         horarios: {
             mexico: formatTime(horasEnPais[0]),
             colombia: formatTime(horasEnPais[1]),
@@ -114,9 +113,6 @@ handler.before = async function (m) {
     let emoji = reaction.text
     let sender = m.key.participant || m.key.remoteJid
 
-    // Solo procesar reacciones de corazón o pulgar arriba
-    if (!['❤️', '👍🏻', '❤', '👍'].includes(emoji)) return false
-    
     // Verificar si existe la partida
     if (!partidasScrim[key.id]) return false
 
@@ -125,13 +121,23 @@ handler.before = async function (m) {
     // Verificar si el usuario ya está en la lista
     if (data.jugadores.includes(sender) || data.suplentes.includes(sender)) return false
 
-    // Agregar a jugadores principales o suplentes
-    if (data.jugadores.length < 4) {
-        data.jugadores.push(sender)
-    } else if (data.suplentes.length < 2) {
-        data.suplentes.push(sender)
+    // Lógica para diferentes emojis
+    if (['❤️', '👍🏻', '❤', '👍'].includes(emoji)) {
+        // Para jugadores principales
+        if (data.jugadores.length < 4) {
+            data.jugadores.push(sender)
+        } else {
+            return false // Lista de jugadores llena
+        }
+    } else if (emoji === '😂') {
+        // Para suplentes
+        if (data.suplentes.length < 2) {
+            data.suplentes.push(sender)
+        } else {
+            return false // Lista de suplentes llena
+        }
     } else {
-        return false // Lista llena
+        return false // Emoji no válido
     }
 
     // Crear las menciones para jugadores y suplentes
@@ -148,7 +154,7 @@ handler.before = async function (m) {
 🇨🇱 𝐂𝐇𝐈𝐋𝐄 : ${data.horarios.chile}
 🇦🇷 𝐀𝐑𝐆𝐄𝐍𝐓𝐈𝐍𝐀 : ${data.horarios.argentina}
 
-Casilla: ${data.casilla}
+Casilla: 
 
 𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔
 
@@ -162,7 +168,7 @@ Casilla: ${data.casilla}
 🥷🏻 ┇ ${suplentes[0] || ''}
 🥷🏻 ┇ ${suplentes[1] || ''}
 
-${data.jugadores.length < 4 || data.suplentes.length < 2 ? '(𝚁𝚎𝚊𝚌𝚌𝚒𝚘𝚗𝚊 𝚌𝚘𝚗 ❤️ 𝚙𝚊𝚛𝚊 𝚞𝚗𝚒𝚛𝚝𝚎)' : '✅ 𝐋𝐈𝐒𝐓𝐀 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐀'}
+${data.jugadores.length < 4 || data.suplentes.length < 2 ? '(𝚁𝚎𝚊𝚌𝚌𝚒𝚘𝚗𝚊 𝚌𝚘𝚗 ❤️ 𝚙𝚊𝚛𝚊 𝚞𝚗𝚒𝚛𝚝𝚎 𝚊 𝚕𝚊 𝚎𝚜𝚌𝚞𝚊𝚍𝚛𝚊)\n(𝚁𝚎𝚊𝚌𝚌𝚒𝚘𝚗𝚊 𝚌𝚘𝚗 😂 𝚙𝚊𝚛𝚊 𝚜𝚎𝚛 𝚜𝚞𝚙𝚕𝚎𝚗𝚝𝚎)' : '✅ 𝐋𝐈𝐒𝐓𝐀 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐀'}
     `.trim()
 
     try {
