@@ -2,8 +2,8 @@ let partidasScrim = {};
 
 const handler = async (m, { conn, args }) => {
     // Verificar si se proporcionaron los argumentos necesarios
-    if (args.length < 2) {
-        conn.reply(m.chat, '_Debes proporcionar la hora (HH:MM) y el país (MX, CO, CL, AR)._', m);
+    if (args.length < 3) {
+        conn.reply(m.chat, '_Debes proporcionar la hora (HH:MM), el país (MX, CO, CL, AR) y la casilla (ej: C10)._', m);
         return;
     }
 
@@ -16,6 +16,7 @@ const handler = async (m, { conn, args }) => {
 
     const horaUsuario = args[0]; // Hora proporcionada por el usuario
     const pais = args[1].toUpperCase(); // País proporcionado por el usuario
+    const casilla = args[2].toUpperCase(); // Casilla proporcionada por el usuario
 
     // Definir la diferencia horaria de cada país con respecto a México
     const diferenciasHorarias = {
@@ -64,7 +65,7 @@ const handler = async (m, { conn, args }) => {
 🇨🇱 𝐂𝐇𝐈𝐋𝐄 : ${formatTime(horasEnPais[2])}
 🇦🇷 𝐀𝐑𝐆𝐄𝐍𝐓𝐈𝐍𝐀 : ${formatTime(horasEnPais[3])}
 
-𝐇𝐎𝐑𝐀 𝐀𝐂𝐓𝐔𝐀𝐋 𝐄𝐍 𝐌𝐄𝐗𝐈𝐂𝐎🇲🇽 : ${horaActual}
+Casilla: ${casilla}
 
 𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔
 
@@ -88,6 +89,7 @@ const handler = async (m, { conn, args }) => {
         chat: m.chat,
         jugadores: [],
         suplentes: [],
+        casilla: casilla, // Guardar la casilla
         horarios: {
             mexico: formatTime(horasEnPais[0]),
             colombia: formatTime(horasEnPais[1]),
@@ -146,7 +148,7 @@ handler.before = async function (m) {
 🇨🇱 𝐂𝐇𝐈𝐋𝐄 : ${data.horarios.chile}
 🇦🇷 𝐀𝐑𝐆𝐄𝐍𝐓𝐈𝐍𝐀 : ${data.horarios.argentina}
 
-𝐇𝐎𝐑𝐀 𝐀𝐂𝐓𝐔𝐀𝐋 𝐄𝐍 𝐌𝐄𝐗𝐈𝐂𝐎🇲🇽 : ${data.horarios.actual}
+Casilla: ${data.casilla}
 
 𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔
 
