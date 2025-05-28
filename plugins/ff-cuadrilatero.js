@@ -1,3 +1,5 @@
+let partidasCuadrilatero = {};
+
 const handler = async (m, { conn, args }) => {
     // Verificar si se proporcionaron los argumentos necesarios
     if (args.length < 2) {
@@ -59,11 +61,110 @@ const handler = async (m, { conn, args }) => {
     ㅤʚ 𝐒𝐔𝐏𝐋𝐄𝐍𝐓𝐄:
     🥷🏻 ┇ 
     🥷🏻 ┇
+
+(𝚁𝚎𝚊𝚌𝚌𝚒𝚘𝚗𝚊 𝚌𝚘𝚗 ❤️ 𝚙𝚊𝚛𝚊 𝚞𝚗𝚒𝚛𝚝𝚎)
     `.trim();
     
-    conn.sendMessage(m.chat, {text: message}, {quoted: m});
+    let msg = await conn.sendMessage(m.chat, {text: message}, {quoted: m});
+    partidasCuadrilatero[msg.key.id] = {
+        chat: m.chat,
+        jugadores: [],
+        suplentes: [],
+        horaUsuario: horaUsuario,
+        horaAdelantada: horaAdelantada,
+        colorRopa: colorRopa,
+        originalMsg: msg,
+    };
 };
+
 handler.help = ['cuadrilatero']
 handler.tags = ['freefire']
 handler.command = /^(cuadri|cuadrilatero)$/i;
+handler.group = true
+handler.admin = true
+
+// Función para manejar las reacciones
+handler.before = async function (m) {
+    if (!m.message?.reactionMessage) return false
+    
+    let reaction = m.message.reactionMessage
+    let key = reaction.key
+    let emoji = reaction.text
+    let sender = m.key.participant || m.key.remoteJid
+
+    // Solo procesar reacciones de corazón o pulgar arriba
+    if (!['❤️', '👍🏻', '❤', '👍'].includes(emoji)) return false
+    
+    // Verificar si existe la partida
+    if (!partidasCuadrilatero[key.id]) return false
+
+    let data = partidasCuadrilatero[key.id]
+
+    // Verificar si el usuario ya está en la lista
+    if (data.jugadores.includes(sender) || data.suplentes.includes(sender)) return false
+
+    // Agregar a jugadores principales o suplentes (12 jugadores + 2 suplentes)
+    if (data.jugadores.length < 12) {
+        data.jugadores.push(sender)
+    } else if (data.suplentes.length < 2) {
+        data.suplentes.push(sender)
+    } else {
+        return false // Lista llena
+    }
+
+    // Crear las menciones para jugadores y suplentes
+    let jugadores = data.jugadores.map(u => `@${u.split('@')[0]}`)
+    let suplentes = data.suplentes.map(u => `@${u.split('@')[0]}`)
+
+    const message = `
+    _*CUADRILATERO*_
+    
+    𝐇𝐎𝐑𝐀𝐑𝐈𝐎
+    🇲🇽 𝐌𝐄𝐗 : ${data.horaUsuario}
+    🇨🇴 𝐂𝐎𝐋 : ${data.horaAdelantada}
+    𝐂𝐎𝐋𝐎𝐑 𝐃𝐄 𝐑𝐎𝐏𝐀: ${data.colorRopa}
+
+    ¬ 𝐉𝐔𝐆𝐀𝐃𝐎𝐑𝐄𝐒 𝐏𝐑𝐄𝐒𝐄𝐍𝐓𝐄𝐒
+    
+          𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔 1
+    
+    👑 ┇ ${jugadores[0] || ''}
+    🥷🏻 ┇ ${jugadores[1] || ''}
+    🥷🏻 ┇ ${jugadores[2] || ''}
+    🥷🏻 ┇ ${jugadores[3] || ''}
+          
+         𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔 2
+    
+    👑 ┇ ${jugadores[4] || ''}
+    🥷🏻 ┇ ${jugadores[5] || ''}
+    🥷🏻 ┇ ${jugadores[6] || ''}
+    🥷🏻 ┇ ${jugadores[7] || ''}
+
+         𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔 3
+    
+    👑 ┇ ${jugadores[8] || ''}
+    🥷🏻 ┇ ${jugadores[9] || ''}
+    🥷🏻 ┇ ${jugadores[10] || ''}
+    🥷🏻 ┇ ${jugadores[11] || ''}
+    
+    ㅤʚ 𝐒𝐔𝐏𝐋𝐄𝐍𝐓𝐄:
+    🥷🏻 ┇ ${suplentes[0] || ''}
+    🥷🏻 ┇ ${suplentes[1] || ''}
+
+${data.jugadores.length < 12 || data.suplentes.length < 2 ? '(𝚁𝚎𝚊𝚌𝚌𝚒𝚘𝚗𝚊 𝚌𝚘𝚗 ❤️ 𝚙𝚊𝚛𝚊 𝚞𝚗𝚒𝚛𝚝𝚎)' : '✅ 𝐋𝐈𝐒𝐓𝐀 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐀'}
+    `.trim();
+
+    try {
+        await this.sendMessage(data.chat, {
+            text: message,
+            edit: data.originalMsg.key,
+            mentions: [...data.jugadores, ...data.suplentes]
+        })
+    } catch (error) {
+        console.error('Error al editar mensaje:', error)
+    }
+
+    return false
+}
+
 export default handler;
