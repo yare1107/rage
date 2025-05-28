@@ -112,33 +112,65 @@ handler.before = async function (m) {
     let key = reaction.key
     let emoji = reaction.text
     let sender = m.key.participant || m.key.remoteJid
+    let operation = reaction.operation || 'add' // 'add' para agregar, 'remove' para quitar
 
     // Verificar si existe la partida
     if (!partidasScrim[key.id]) return false
 
     let data = partidasScrim[key.id]
+    let wasInJugadores = data.jugadores.includes(sender)
+    let wasInSuplentes = data.suplentes.includes(sender)
+    let shouldUpdate = false
 
-    // Verificar si el usuario ya está en la lista
-    if (data.jugadores.includes(sender) || data.suplentes.includes(sender)) return false
+    // Si es operación de remover reacción
+    if (operation === 'remove') {
+        if (wasInJugadores) {
+            data.jugadores = data.jugadores.filter(u => u !== sender)
+            shouldUpdate = true
+        } else if (wasInSuplentes) {
+            data.suplentes = data.suplentes.filter(u => u !== sender)
+            shouldUpdate = true
+        }
+    } 
+    // Si es operación de agregar reacción
+    else if (operation === 'add') {
+        // Si el usuario ya está en alguna lista, lo removemos primero (cambio de reacción)
+        if (wasInJugadores) {
+            data.jugadores = data.jugadores.filter(u => u !== sender)
+        } else if (wasInSuplentes) {
+            data.suplentes = data.suplentes.filter(u => u !== sender)
+        }
 
-    // Lógica para diferentes emojis
-    if (['❤️', '👍🏻', '❤', '👍'].includes(emoji)) {
-        // Para jugadores principales
-        if (data.jugadores.length < 4) {
-            data.jugadores.push(sender)
+        // Lógica para diferentes emojis
+        if (['❤️', '👍🏻', '❤', '👍'].includes(emoji)) {
+            // Para jugadores principales
+            if (data.jugadores.length < 4) {
+                data.jugadores.push(sender)
+                shouldUpdate = true
+            } else if (!wasInJugadores && !wasInSuplentes) {
+                return false // Lista de jugadores llena y es usuario nuevo
+            }
+        } else if (emoji === '😂') {
+            // Para suplentes
+            if (data.suplentes.length < 2) {
+                data.suplentes.push(sender)
+                shouldUpdate = true
+            } else if (!wasInJugadores && !wasInSuplentes) {
+                return false // Lista de suplentes llena y es usuario nuevo
+            }
         } else {
-            return false // Lista de jugadores llena
+            // Emoji no válido, si estaba en alguna lista lo mantenemos
+            if (wasInJugadores && data.jugadores.length < 4) {
+                data.jugadores.push(sender)
+            } else if (wasInSuplentes && data.suplentes.length < 2) {
+                data.suplentes.push(sender)
+            }
+            return false
         }
-    } else if (emoji === '😂') {
-        // Para suplentes
-        if (data.suplentes.length < 2) {
-            data.suplentes.push(sender)
-        } else {
-            return false // Lista de suplentes llena
-        }
-    } else {
-        return false // Emoji no válido
     }
+
+    // Solo actualizar si hubo cambios
+    if (!shouldUpdate) return false
 
     // Crear las menciones para jugadores y suplentes
     let jugadores = data.jugadores.map(u => `@${u.split('@')[0]}`)
