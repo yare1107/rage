@@ -101,12 +101,18 @@ const fkontak = {
 
 let msg = await conn.sendFile(m.chat, img, 'hades.jpg', texto, fkontak)
 
-// Guardar información de la partida
-partidasGDC[msg.key.id] = {
+// Guardar información de la partida con un identificador único
+const partidaId = `${msg.key.id}_${m.chat}`
+partidasGDC[partidaId] = {
   chat: m.chat,
   escuadras: Array(10).fill().map(() => []), // 10 escuadras, cada una con array de jugadores
   originalMsg: msg,
+  messageId: msg.key.id,
+  chatId: m.chat
 }
+
+// También guardar con el ID del mensaje solo (para compatibilidad)
+partidasGDC[msg.key.id] = partidasGDC[partidaId]
 
 global.db.data.users[m.sender].lastcofre = new Date * 1
 }
@@ -129,16 +135,34 @@ handler.before = async function (m) {
   // Solo procesar reacciones de corazón o pulgar arriba
   if (!['❤️', '👍🏻', '❤', '👍'].includes(emoji)) return false
   
-  // Verificar si existe la partida
-  if (!partidasGDC[key.id]) return false
-
-  let data = partidasGDC[key.id]
+  // Buscar la partida con diferentes métodos de identificación
+  let data = null
+  const partidaId = `${key.id}_${m.chat}`
+  
+  if (partidasGDC[partidaId]) {
+    data = partidasGDC[partidaId]
+  } else if (partidasGDC[key.id]) {
+    data = partidasGDC[key.id]
+  } else {
+    // Buscar por chat y mensaje ID
+    for (let id in partidasGDC) {
+      if (partidasGDC[id].messageId === key.id && partidasGDC[id].chatId === m.chat) {
+        data = partidasGDC[id]
+        break
+      }
+    }
+  }
+  
+  // Si no se encuentra la partida, salir
+  if (!data) return false
 
   // Verificar si el usuario ya está en alguna escuadra
   let usuarioEnEscuadra = false
+  let escuadraActual = -1
   for (let i = 0; i < data.escuadras.length; i++) {
     if (data.escuadras[i].includes(sender)) {
       usuarioEnEscuadra = true
+      escuadraActual = i
       break
     }
   }
@@ -195,13 +219,29 @@ ${todasLlenas ? '✅ 𝐓𝐎𝐃𝐀𝐒 𝐋𝐀𝐒 𝐄𝐒𝐂𝐔𝐀𝐃�
   })
 
   try {
+    // Intentar editar el mensaje
     await this.sendMessage(data.chat, {
       text: plantilla.trim(),
       edit: data.originalMsg.key,
       mentions: allMentions
     })
   } catch (error) {
-    console.error('Error al editar mensaje:', error)
+    console.error('Error al editar mensaje GDC:', error)
+    
+    // Si falla la edición, enviar un nuevo mensaje
+    try {
+      let newMsg = await this.sendMessage(data.chat, {
+        text: plantilla.trim(),
+        mentions: allMentions
+      })
+      
+      // Actualizar la referencia del mensaje
+      data.originalMsg = newMsg
+      data.messageId = newMsg.key.id
+      
+    } catch (error2) {
+      console.error('Error al enviar nuevo mensaje GDC:', error2)
+    }
   }
 
   return false
