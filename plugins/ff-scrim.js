@@ -1,3 +1,5 @@
+let partidasScrim = {};
+
 const handler = async (m, { conn, args }) => {
     // Verificar si se proporcionaron los argumentos necesarios
     if (args.length < 2) {
@@ -75,11 +77,103 @@ const handler = async (m, { conn, args }) => {
 ㅤʚ 𝐒𝐔𝐏𝐋𝐄𝐍𝐓𝐄:
 🥷🏻 ┇ 
 🥷🏻 ┇
+
+(𝚁𝚎𝚊𝚌𝚌𝚒𝚘𝚗𝚊 𝚌𝚘𝚗 ❤️ 𝚙𝚊𝚛𝚊 𝚞𝚗𝚒𝚛𝚝𝚎)
 `.trim();
     
-    conn.sendMessage(m.chat, { text: message }, { quoted: m });
+    let msg = await conn.sendMessage(m.chat, { text: message }, { quoted: m });
+    
+    // Guardar información de la partida
+    partidasScrim[msg.key.id] = {
+        chat: m.chat,
+        jugadores: [],
+        suplentes: [],
+        horarios: {
+            mexico: formatTime(horasEnPais[0]),
+            colombia: formatTime(horasEnPais[1]),
+            chile: formatTime(horasEnPais[2]),
+            argentina: formatTime(horasEnPais[3]),
+            actual: horaActual
+        },
+        originalMsg: msg,
+    };
 };
+
 handler.help = ['scrim']
 handler.tags = ['freefire']
 handler.command = /^(scrim|scrims|vsscrims|vsscrim)$/i;
+
+// Función para manejar las reacciones
+handler.before = async function (m) {
+    if (!m.message?.reactionMessage) return false
+    
+    let reaction = m.message.reactionMessage
+    let key = reaction.key
+    let emoji = reaction.text
+    let sender = m.key.participant || m.key.remoteJid
+
+    // Solo procesar reacciones de corazón o pulgar arriba
+    if (!['❤️', '👍🏻', '❤', '👍'].includes(emoji)) return false
+    
+    // Verificar si existe la partida
+    if (!partidasScrim[key.id]) return false
+
+    let data = partidasScrim[key.id]
+
+    // Verificar si el usuario ya está en la lista
+    if (data.jugadores.includes(sender) || data.suplentes.includes(sender)) return false
+
+    // Agregar a jugadores principales o suplentes
+    if (data.jugadores.length < 4) {
+        data.jugadores.push(sender)
+    } else if (data.suplentes.length < 2) {
+        data.suplentes.push(sender)
+    } else {
+        return false // Lista llena
+    }
+
+    // Crear las menciones para jugadores y suplentes
+    let jugadores = data.jugadores.map(u => `@${u.split('@')[0]}`)
+    let suplentes = data.suplentes.map(u => `@${u.split('@')[0]}`)
+
+    let plantilla = `
+*SCRIM*
+
+𝐇𝐎𝐑𝐀𝐑𝐈𝐎
+
+🇲🇽 𝐌𝐄𝐗𝐈𝐂𝐎 : ${data.horarios.mexico}
+🇨🇴 𝐂𝐎𝐋𝐎𝐌𝐁𝐈𝐀 : ${data.horarios.colombia}
+🇨🇱 𝐂𝐇𝐈𝐋𝐄 : ${data.horarios.chile}
+🇦🇷 𝐀𝐑𝐆𝐄𝐍𝐓𝐈𝐍𝐀 : ${data.horarios.argentina}
+
+𝐇𝐎𝐑𝐀 𝐀𝐂𝐓𝐔𝐀𝐋 𝐄𝐍 𝐌𝐄𝐗𝐈𝐂𝐎🇲🇽 : ${data.horarios.actual}
+
+𝗘𝗦𝗖𝗨𝗔𝗗𝗥𝗔
+
+👑 ┇ ${jugadores[0] || ''}
+🥷🏻 ┇ ${jugadores[1] || ''}
+🥷🏻 ┇ ${jugadores[2] || ''}
+🥷🏻 ┇ ${jugadores[3] || ''}
+
+
+ㅤʚ 𝐒𝐔𝐏𝐋𝐄𝐍𝐓𝐄:
+🥷🏻 ┇ ${suplentes[0] || ''}
+🥷🏻 ┇ ${suplentes[1] || ''}
+
+${data.jugadores.length < 4 || data.suplentes.length < 2 ? '(𝚁𝚎𝚊𝚌𝚌𝚒𝚘𝚗𝚊 𝚌𝚘𝚗 ❤️ 𝚙𝚊𝚛𝚊 𝚞𝚗𝚒𝚛𝚝𝚎)' : '✅ 𝐋𝐈𝐒𝐓𝐀 𝐂𝐎𝐌𝐏𝐋𝐄𝐓𝐀'}
+    `.trim()
+
+    try {
+        await this.sendMessage(data.chat, {
+            text: plantilla,
+            edit: data.originalMsg.key,
+            mentions: [...data.jugadores, ...data.suplentes]
+        })
+    } catch (error) {
+        console.error('Error al editar mensaje:', error)
+    }
+
+    return false
+}
+
 export default handler;
